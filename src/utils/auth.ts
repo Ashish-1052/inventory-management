@@ -2,7 +2,17 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const SALT_ROUNDS = 10;
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+const JWT_SECRET = process.env.JWT_SECRET!;
+const REFRESH_SECRET = process.env.REFRESH_SECRET!;
+
+interface AccessTokenPayload {
+  id: string;
+  role: string;
+}
+
+interface RefreshTokenPayload {
+  id: string;
+}
 
 // Hash a plain password
 export const hashPassword = async (password: string) => {
@@ -15,11 +25,21 @@ export const comparePassword = async (password: string, hash: string) => {
 };
 
 // Generate JWT token
-export const generateToken = (payload: object) => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
+export const generateAccessToken = (payload: AccessTokenPayload) => {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "15min" });
+};
+
+// Generate Refresh token
+export const generateRefreshToken = (payload: RefreshTokenPayload) => {
+  return jwt.sign(payload, REFRESH_SECRET, { expiresIn: "7d" });
 };
 
 // Verify JWT token
-export const verifyToken = (token: string) => {
-  return jwt.verify(token, JWT_SECRET);
+export const verifyToken = (token: string): AccessTokenPayload => {
+  return jwt.verify(token, JWT_SECRET) as AccessTokenPayload;
+};
+
+// Verify Refresh token
+export const verifyRefreshToken = (token: string): RefreshTokenPayload => {
+  return jwt.verify(token, REFRESH_SECRET) as RefreshTokenPayload;
 };
