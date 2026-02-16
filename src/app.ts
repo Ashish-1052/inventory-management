@@ -6,6 +6,10 @@ import cookieParser from "cookie-parser";
 
 const app: Application = express();
 
+// when running behind a proxy (Render, Vercel, etc.) trust the first proxy
+// so secure cookies and IP-related behavior work correctly
+app.set("trust proxy", 1);
+
 app.use(cors({
     origin: process.env.FRONTEND_URL || "http://localhost:8081",
     credentials: true,
